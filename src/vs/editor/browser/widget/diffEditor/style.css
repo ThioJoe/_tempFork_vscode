@@ -102,11 +102,13 @@
 }
 
 .monaco-editor .movedOriginal {
-	border: 2px solid var(--vscode-diffEditor-move-border);
+       border: 2px solid var(--vscode-diffEditor-move-border);
+       background-color: var(--vscode-diffEditor-move-background);
 }
 
 .monaco-editor .movedModified {
-	border: 2px solid var(--vscode-diffEditor-move-border);
+       border: 2px solid var(--vscode-diffEditor-move-border);
+       background-color: var(--vscode-diffEditor-move-background);
 }
 
 .monaco-editor .movedOriginal.currentMove, .monaco-editor .movedModified.currentMove {
@@ -158,9 +160,10 @@
 }
 
 .monaco-diff-editor .diff-moved-code-block {
-	display: flex;
-	justify-content: flex-end;
-	margin-top: -4px;
+       display: flex;
+       justify-content: flex-end;
+       margin-top: -4px;
+       background-color: var(--vscode-diffEditor-move-background);
 }
 
 .monaco-diff-editor .diff-moved-code-block .action-bar .action-label.codicon {
