@@ -11,9 +11,15 @@ import { registerColor } from '../../../../platform/theme/common/colorRegistry.j
 import { registerIcon } from '../../../../platform/theme/common/iconRegistry.js';
 
 export const diffMoveBorder = registerColor(
-	'diffEditor.move.border',
-	'#8b8b8b9c',
-	localize('diffEditor.move.border', 'The border color for text that got moved in the diff editor.')
+        'diffEditor.move.border',
+        '#8b8b8b9c',
+        localize('diffEditor.move.border', 'The border color for text that got moved in the diff editor.')
+);
+
+export const diffMoveBackground = registerColor(
+       'diffEditor.move.background',
+       null,
+       localize('diffEditor.move.background', 'The background color for text that got moved in the diff editor.')
 );
 
 export const diffMoveBorderActive = registerColor(
