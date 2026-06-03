@@ -148,6 +148,8 @@
 		"--vscode-diffEditor-insertedTextBorder",
 		"--vscode-diffEditor-move-border",
 		"--vscode-diffEditor-moveActive-border",
+		"--vscode-diffEditor-move-background",
+		"--vscode-diffEditor-moveActive-background",
 		"--vscode-diffEditor-removedLineBackground",
 		"--vscode-diffEditor-removedTextBackground",
 		"--vscode-diffEditor-removedTextBorder",
