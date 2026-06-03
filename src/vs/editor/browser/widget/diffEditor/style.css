@@ -243,6 +243,24 @@
 	cursor: pointer;
 }
 
+.monaco-editor .line-move, .monaco-diff-editor .line-move {
+	background-color: var(--vscode-diffEditor-move-background);
+}
+
+.monaco-editor .line-move.currentMove, .monaco-diff-editor .line-move.currentMove {
+	background-color: var(--vscode-diffEditor-moveActive-background);
+}
+
+.monaco-editor .gutter-move, .monaco-diff-editor .gutter-move,
+.monaco-editor .move-sign, .monaco-diff-editor .move-sign {
+	background-color: var(--vscode-diffEditor-move-background);
+}
+
+.monaco-editor .gutter-move.currentMove, .monaco-diff-editor .gutter-move.currentMove,
+.monaco-editor .move-sign.currentMove, .monaco-diff-editor .move-sign.currentMove {
+	background-color: var(--vscode-diffEditor-moveActive-background);
+}
+
 .monaco-editor .char-insert, .monaco-diff-editor .char-insert {
 	background-color: var(--vscode-diffEditor-insertedTextBackground);
 }
@@ -274,24 +292,6 @@
 .monaco-editor .inline-added-margin-view-zone,
 .monaco-editor .gutter-insert, .monaco-diff-editor .gutter-insert {
 	background-color: var(--vscode-diffEditorGutter-insertedLineBackground, var(--vscode-diffEditor-insertedLineBackground), var(--vscode-diffEditor-insertedTextBackground));
-}
-
-.monaco-editor .line-move, .monaco-diff-editor .line-move {
-	background-color: var(--vscode-diffEditor-move-background);
-}
-
-.monaco-editor .line-move.currentMove, .monaco-diff-editor .line-move.currentMove {
-	background-color: var(--vscode-diffEditor-moveActive-background);
-}
-
-.monaco-editor .gutter-move, .monaco-diff-editor .gutter-move,
-.monaco-editor .move-sign, .monaco-diff-editor .move-sign {
-	background-color: var(--vscode-diffEditor-move-background);
-}
-
-.monaco-editor .gutter-move.currentMove, .monaco-diff-editor .gutter-move.currentMove,
-.monaco-editor .move-sign.currentMove, .monaco-diff-editor .move-sign.currentMove {
-	background-color: var(--vscode-diffEditor-moveActive-background);
 }
 
 .monaco-editor .char-delete, .monaco-diff-editor .char-delete, .monaco-editor .inline-deleted-text {
