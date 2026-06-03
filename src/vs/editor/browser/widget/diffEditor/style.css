@@ -311,6 +311,30 @@
 	background-color: var(--vscode-diffEditorGutter-removedLineBackground, var(--vscode-diffEditor-removedLineBackground), var(--vscode-diffEditor-removedTextBackground));
 }
 
+.monaco-editor .line-move.line-insert, .monaco-diff-editor .line-move.line-insert,
+.monaco-editor .line-move.currentMove.line-insert, .monaco-diff-editor .line-move.currentMove.line-insert {
+	background-color: var(--vscode-diffEditor-insertedLineBackground, var(--vscode-diffEditor-insertedTextBackground));
+}
+
+.monaco-editor .gutter-move.gutter-insert, .monaco-diff-editor .gutter-move.gutter-insert,
+.monaco-editor .gutter-move.currentMove.gutter-insert, .monaco-diff-editor .gutter-move.currentMove.gutter-insert,
+.monaco-editor .move-sign.insert-sign, .monaco-diff-editor .move-sign.insert-sign,
+.monaco-editor .move-sign.currentMove.insert-sign, .monaco-diff-editor .move-sign.currentMove.insert-sign {
+	background-color: var(--vscode-diffEditorGutter-insertedLineBackground, var(--vscode-diffEditor-insertedLineBackground), var(--vscode-diffEditor-insertedTextBackground));
+}
+
+.monaco-editor .line-move.line-delete, .monaco-diff-editor .line-move.line-delete,
+.monaco-editor .line-move.currentMove.line-delete, .monaco-diff-editor .line-move.currentMove.line-delete {
+	background-color: var(--vscode-diffEditor-removedLineBackground, var(--vscode-diffEditor-removedTextBackground));
+}
+
+.monaco-editor .gutter-move.gutter-delete, .monaco-diff-editor .gutter-move.gutter-delete,
+.monaco-editor .gutter-move.currentMove.gutter-delete, .monaco-diff-editor .gutter-move.currentMove.gutter-delete,
+.monaco-editor .move-sign.delete-sign, .monaco-diff-editor .move-sign.delete-sign,
+.monaco-editor .move-sign.currentMove.delete-sign, .monaco-diff-editor .move-sign.currentMove.delete-sign {
+	background-color: var(--vscode-diffEditorGutter-removedLineBackground, var(--vscode-diffEditor-removedLineBackground), var(--vscode-diffEditor-removedTextBackground));
+}
+
 .monaco-diff-editor.side-by-side .editor.modified {
 	box-shadow: -6px 0 5px -5px var(--vscode-scrollbar-shadow);
 	border-left: 1px solid var(--vscode-diffEditor-border);
