@@ -77,14 +77,12 @@ export const diffLineMoveDecorationBackground = ModelDecorationOptions.register(
 	className: 'line-move',
 	description: 'line-move',
 	isWholeLine: true,
-	linesDecorationsClassName: 'move-sign',
 });
 
 export const diffLineMoveActiveDecorationBackground = ModelDecorationOptions.register({
 	className: 'line-move currentMove',
 	description: 'line-move currentMove',
 	isWholeLine: true,
-	linesDecorationsClassName: 'move-sign currentMove',
 });
 
 export const diffAddDecoration = ModelDecorationOptions.register({
