@@ -79,7 +79,6 @@ export const diffLineMoveDecorationBackground = ModelDecorationOptions.register(
 	isWholeLine: true,
 	linesDecorationsClassName: 'move-sign',
 	marginClassName: 'gutter-move',
-	zIndex: 10,
 });
 
 export const diffLineMoveActiveDecorationBackground = ModelDecorationOptions.register({
@@ -88,7 +87,6 @@ export const diffLineMoveActiveDecorationBackground = ModelDecorationOptions.reg
 	isWholeLine: true,
 	linesDecorationsClassName: 'move-sign currentMove',
 	marginClassName: 'gutter-move currentMove',
-	zIndex: 10,
 });
 
 export const diffAddDecoration = ModelDecorationOptions.register({

@@ -414,20 +414,9 @@ interface SerializedState {
 
 export class DiffState {
 	public static fromDiffResult(result: IDocumentDiff): DiffState {
-		const moves = result.moves || [];
 		return new DiffState(
-			result.changes.map(c => {
-				const movedFrom = c.modified.isEmpty ? moves.find(m => m.lineRangeMapping.original.equals(c.original)) : undefined;
-				if (movedFrom) {
-					return new DiffMapping(c, movedFrom, 'original');
-				}
-				const movedTo = c.original.isEmpty ? moves.find(m => m.lineRangeMapping.modified.equals(c.modified)) : undefined;
-				if (movedTo) {
-					return new DiffMapping(c, movedTo, 'modified');
-				}
-				return new DiffMapping(c);
-			}),
-			moves,
+			result.changes.map(c => new DiffMapping(c)),
+			result.moves || [],
 			result.identical,
 			result.quitEarly,
 		);
@@ -444,8 +433,6 @@ export class DiffState {
 export class DiffMapping {
 	constructor(
 		readonly lineRangeMapping: DetailedLineRangeMapping,
-		readonly movedText?: MovedText,
-		readonly movedTextSide?: 'original' | 'modified',
 	) { }
 }
 

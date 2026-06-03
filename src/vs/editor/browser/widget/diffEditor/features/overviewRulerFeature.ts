@@ -13,9 +13,10 @@ import { IObservable, autorun, autorunWithStore, derived, observableFromEvent, o
 import { CodeEditorWidget } from '../../codeEditor/codeEditorWidget.js';
 import { DiffEditorEditors } from '../components/diffEditorEditors.js';
 import { DiffEditorViewModel } from '../diffEditorViewModel.js';
+import { diffMoveBackground, diffMoveBackgroundActive } from '../registrations.contribution.js';
 import { appendRemoveOnDispose } from '../utils.js';
 import { EditorLayoutInfo, EditorOption } from '../../../../common/config/editorOptions.js';
-import { LineRange } from '../../../../common/core/ranges/lineRange.js';
+import { LineRange, LineRangeSet } from '../../../../common/core/ranges/lineRange.js';
 import { Position } from '../../../../common/core/position.js';
 import { OverviewRulerZone } from '../../../../common/viewModel/overviewZoneManager.js';
 import { defaultInsertColor, defaultRemoveColor, diffInserted, diffOverviewRulerInserted, diffOverviewRulerRemoved, diffRemoved } from '../../../../../platform/theme/common/colorRegistry.js';
@@ -44,7 +45,9 @@ export class OverviewRulerFeature extends Disposable {
 			const theme = currentColorTheme.read(reader);
 			const insertColor = theme.getColor(diffOverviewRulerInserted) || (theme.getColor(diffInserted) || defaultInsertColor).transparent(2);
 			const removeColor = theme.getColor(diffOverviewRulerRemoved) || (theme.getColor(diffRemoved) || defaultRemoveColor).transparent(2);
-			return { insertColor, removeColor };
+			const moveColor = theme.getColor(diffMoveBackground) || Color.fromHex('#8b8b8b33');
+			const activeMoveColor = theme.getColor(diffMoveBackgroundActive) || Color.fromHex('#FFA50033');
+			return { insertColor, removeColor, moveColor, activeMoveColor };
 		});
 
 		const viewportDomElement = createFastDomNode(document.createElement('div'));
@@ -97,30 +100,57 @@ export class OverviewRulerFeature extends Disposable {
 				modHiddenRangesChanged.read(reader);
 
 				const colors = currentColors.read(reader);
-				const diff = m?.diff.read(reader)?.mappings;
+				const diff = m?.diff.read(reader);
+				const activeMovedText = m?.activeMovedText.read(reader);
 
-				function createZones(ranges: LineRange[], color: Color, editor: CodeEditorWidget) {
+				interface ColoredLineRange {
+					range: LineRange;
+					color: Color;
+				}
+
+				function createZones(ranges: ColoredLineRange[], editor: CodeEditorWidget) {
 					const vm = editor._getViewModel();
 					if (!vm) {
 						return [];
 					}
 					return ranges
-						.filter(d => d.length > 0)
+						.filter(d => d.range.length > 0)
 						.map(r => {
-							const start = vm.coordinatesConverter.convertModelPositionToViewPosition(new Position(r.startLineNumber, 1));
-							const end = vm.coordinatesConverter.convertModelPositionToViewPosition(new Position(r.endLineNumberExclusive, 1));
+							const start = vm.coordinatesConverter.convertModelPositionToViewPosition(new Position(r.range.startLineNumber, 1));
+							const end = vm.coordinatesConverter.convertModelPositionToViewPosition(new Position(r.range.endLineNumberExclusive, 1));
 							// By computing the lineCount, we won't ask the view model later for the bottom vertical position.
 							// (The view model will take into account the alignment viewzones, which will give
 							// modifications and deletetions always the same height.)
 							const lineCount = end.lineNumber - start.lineNumber;
-							return new OverviewRulerZone(start.lineNumber, end.lineNumber, lineCount, color.toString());
+							return new OverviewRulerZone(start.lineNumber, end.lineNumber, lineCount, r.color.toString());
 						});
 				}
 
-				const originalZones = createZones((diff || []).map(d => d.lineRangeMapping.original), colors.removeColor, this._editors.original);
-				const modifiedZones = createZones((diff || []).map(d => d.lineRangeMapping.modified), colors.insertColor, this._editors.modified);
-				originalOverviewRuler?.setZones(originalZones);
-				modifiedOverviewRuler?.setZones(modifiedZones);
+				const originalMovedRanges = new LineRangeSet();
+				const modifiedMovedRanges = new LineRangeSet();
+				for (const movedText of diff?.movedTexts || []) {
+					originalMovedRanges.addRange(movedText.lineRangeMapping.original);
+					modifiedMovedRanges.addRange(movedText.lineRangeMapping.modified);
+				}
+
+				const originalRanges: ColoredLineRange[] = [];
+				const modifiedRanges: ColoredLineRange[] = [];
+				for (const mapping of diff?.mappings || []) {
+					originalRanges.push(...originalMovedRanges.subtractFrom(mapping.lineRangeMapping.original).ranges.map(range => ({ range, color: colors.removeColor })));
+					modifiedRanges.push(...modifiedMovedRanges.subtractFrom(mapping.lineRangeMapping.modified).ranges.map(range => ({ range, color: colors.insertColor })));
+				}
+				for (const movedText of diff?.movedTexts || []) {
+					const moveColor = movedText === activeMovedText ? colors.activeMoveColor : colors.moveColor;
+					originalRanges.push({ range: movedText.lineRangeMapping.original, color: moveColor });
+					modifiedRanges.push({ range: movedText.lineRangeMapping.modified, color: moveColor });
+					for (const change of movedText.changes) {
+						originalRanges.push({ range: change.original, color: colors.removeColor });
+						modifiedRanges.push({ range: change.modified, color: colors.insertColor });
+					}
+				}
+
+				originalOverviewRuler?.setZones(createZones(originalRanges, this._editors.original));
+				modifiedOverviewRuler?.setZones(createZones(modifiedRanges, this._editors.modified));
 			}));
 
 			store.add(autorun(reader => {
