@@ -251,12 +251,10 @@
 	background-color: var(--vscode-diffEditor-moveActive-background);
 }
 
-.monaco-editor .gutter-move, .monaco-diff-editor .gutter-move,
 .monaco-editor .move-sign, .monaco-diff-editor .move-sign {
 	background-color: var(--vscode-diffEditor-move-background);
 }
 
-.monaco-editor .gutter-move.currentMove, .monaco-diff-editor .gutter-move.currentMove,
 .monaco-editor .move-sign.currentMove, .monaco-diff-editor .move-sign.currentMove {
 	background-color: var(--vscode-diffEditor-moveActive-background);
 }
@@ -316,8 +314,6 @@
 	background-color: var(--vscode-diffEditor-insertedLineBackground, var(--vscode-diffEditor-insertedTextBackground));
 }
 
-.monaco-editor .gutter-move.gutter-insert, .monaco-diff-editor .gutter-move.gutter-insert,
-.monaco-editor .gutter-move.currentMove.gutter-insert, .monaco-diff-editor .gutter-move.currentMove.gutter-insert,
 .monaco-editor .move-sign.insert-sign, .monaco-diff-editor .move-sign.insert-sign,
 .monaco-editor .move-sign.currentMove.insert-sign, .monaco-diff-editor .move-sign.currentMove.insert-sign {
 	background-color: var(--vscode-diffEditorGutter-insertedLineBackground, var(--vscode-diffEditor-insertedLineBackground), var(--vscode-diffEditor-insertedTextBackground));
@@ -328,8 +324,6 @@
 	background-color: var(--vscode-diffEditor-removedLineBackground, var(--vscode-diffEditor-removedTextBackground));
 }
 
-.monaco-editor .gutter-move.gutter-delete, .monaco-diff-editor .gutter-move.gutter-delete,
-.monaco-editor .gutter-move.currentMove.gutter-delete, .monaco-diff-editor .gutter-move.currentMove.gutter-delete,
 .monaco-editor .move-sign.delete-sign, .monaco-diff-editor .move-sign.delete-sign,
 .monaco-editor .move-sign.currentMove.delete-sign, .monaco-diff-editor .move-sign.currentMove.delete-sign {
 	background-color: var(--vscode-diffEditorGutter-removedLineBackground, var(--vscode-diffEditor-removedLineBackground), var(--vscode-diffEditor-removedTextBackground));
