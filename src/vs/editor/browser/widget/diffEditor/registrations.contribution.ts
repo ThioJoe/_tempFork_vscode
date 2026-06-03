@@ -25,15 +25,13 @@ export const diffMoveBorderActive = registerColor(
 export const diffMoveBackground = registerColor(
 	'diffEditor.move.background',
 	{ dark: '#8b8b8b33', light: '#8b8b8b33', hcDark: null, hcLight: null },
-	localize('diffEditor.move.background', 'Background color for text that got moved in the diff editor. The color must not be opaque so as not to hide underlying decorations.'),
-	true
+	localize('diffEditor.move.background', 'Background color for lines that got moved in the diff editor.')
 );
 
 export const diffMoveBackgroundActive = registerColor(
 	'diffEditor.moveActive.background',
 	{ dark: '#FFA50033', light: '#FFA50033', hcDark: null, hcLight: null },
-	localize('diffEditor.moveActive.background', 'The active background color for text that got moved in the diff editor. The color must not be opaque so as not to hide underlying decorations.'),
-	true
+	localize('diffEditor.moveActive.background', 'The active background color for lines that got moved in the diff editor.')
 );
 
 export const diffEditorUnchangedRegionShadow = registerColor(
@@ -73,6 +71,24 @@ export const diffLineDeleteDecorationBackground = ModelDecorationOptions.registe
 	description: 'line-delete',
 	isWholeLine: true,
 	marginClassName: 'gutter-delete',
+});
+
+export const diffLineMoveDecorationBackground = ModelDecorationOptions.register({
+	className: 'line-move',
+	description: 'line-move',
+	isWholeLine: true,
+	linesDecorationsClassName: 'move-sign',
+	marginClassName: 'gutter-move',
+	zIndex: 10,
+});
+
+export const diffLineMoveActiveDecorationBackground = ModelDecorationOptions.register({
+	className: 'line-move currentMove',
+	description: 'line-move currentMove',
+	isWholeLine: true,
+	linesDecorationsClassName: 'move-sign currentMove',
+	marginClassName: 'gutter-move currentMove',
+	zIndex: 10,
 });
 
 export const diffAddDecoration = ModelDecorationOptions.register({

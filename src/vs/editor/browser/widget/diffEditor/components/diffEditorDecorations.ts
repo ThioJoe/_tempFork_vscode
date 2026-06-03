@@ -11,7 +11,7 @@ import { DiffEditorOptions } from '../diffEditorOptions.js';
 import { DiffEditorViewModel } from '../diffEditorViewModel.js';
 import { DiffEditorWidget } from '../diffEditorWidget.js';
 import { MovedBlocksLinesFeature } from '../features/movedBlocksLinesFeature.js';
-import { diffAddDecoration, diffAddDecorationEmpty, diffDeleteDecoration, diffDeleteDecorationEmpty, diffLineAddDecorationBackground, diffLineAddDecorationBackgroundWithIndicator, diffLineDeleteDecorationBackground, diffLineDeleteDecorationBackgroundWithIndicator, diffWholeLineAddDecoration, diffWholeLineDeleteDecoration } from '../registrations.contribution.js';
+import { diffAddDecoration, diffAddDecorationEmpty, diffDeleteDecoration, diffDeleteDecorationEmpty, diffLineAddDecorationBackground, diffLineAddDecorationBackgroundWithIndicator, diffLineDeleteDecorationBackground, diffLineDeleteDecorationBackgroundWithIndicator, diffLineMoveActiveDecorationBackground, diffLineMoveDecorationBackground, diffWholeLineAddDecoration, diffWholeLineDeleteDecoration } from '../registrations.contribution.js';
 import { applyObservableDecorations } from '../utils.js';
 import { IModelDeltaDecoration } from '../../../../common/model.js';
 
@@ -41,21 +41,30 @@ export class DiffEditorDecorations extends Disposable {
 
 		const originalDecorations: IModelDeltaDecoration[] = [];
 		const modifiedDecorations: IModelDeltaDecoration[] = [];
+		const activeMovedText = this._diffModel.read(reader)!.activeMovedText.read(reader);
 		if (!movedTextToCompare) {
 			for (const m of diff.mappings) {
+				const movedText = m.movedText;
+				const moveBackground = movedText === activeMovedText ? diffLineMoveActiveDecorationBackground : diffLineMoveDecorationBackground;
+				const originalBackground = movedText && m.movedTextSide === 'original'
+					? moveBackground
+					: renderIndicators ? diffLineDeleteDecorationBackgroundWithIndicator : diffLineDeleteDecorationBackground;
+				const modifiedBackground = movedText && m.movedTextSide === 'modified'
+					? moveBackground
+					: renderIndicators ? diffLineAddDecorationBackgroundWithIndicator : diffLineAddDecorationBackground;
 				if (!m.lineRangeMapping.original.isEmpty) {
-					originalDecorations.push({ range: m.lineRangeMapping.original.toInclusiveRange()!, options: renderIndicators ? diffLineDeleteDecorationBackgroundWithIndicator : diffLineDeleteDecorationBackground });
+					originalDecorations.push({ range: m.lineRangeMapping.original.toInclusiveRange()!, options: originalBackground });
 				}
 				if (!m.lineRangeMapping.modified.isEmpty) {
-					modifiedDecorations.push({ range: m.lineRangeMapping.modified.toInclusiveRange()!, options: renderIndicators ? diffLineAddDecorationBackgroundWithIndicator : diffLineAddDecorationBackground });
+					modifiedDecorations.push({ range: m.lineRangeMapping.modified.toInclusiveRange()!, options: modifiedBackground });
 				}
 
 				if (m.lineRangeMapping.modified.isEmpty || m.lineRangeMapping.original.isEmpty) {
 					if (!m.lineRangeMapping.original.isEmpty) {
-						originalDecorations.push({ range: m.lineRangeMapping.original.toInclusiveRange()!, options: diffWholeLineDeleteDecoration });
+						originalDecorations.push({ range: m.lineRangeMapping.original.toInclusiveRange()!, options: movedText && m.movedTextSide === 'original' ? moveBackground : diffWholeLineDeleteDecoration });
 					}
 					if (!m.lineRangeMapping.modified.isEmpty) {
-						modifiedDecorations.push({ range: m.lineRangeMapping.modified.toInclusiveRange()!, options: diffWholeLineAddDecoration });
+						modifiedDecorations.push({ range: m.lineRangeMapping.modified.toInclusiveRange()!, options: movedText && m.movedTextSide === 'modified' ? moveBackground : diffWholeLineAddDecoration });
 					}
 				} else {
 					const useInlineDiff = this._options.useTrueInlineDiffRendering.read(reader) && allowsTrueInlineDiffRendering(m.lineRangeMapping);
@@ -104,8 +113,6 @@ export class DiffEditorDecorations extends Disposable {
 				}
 			}
 		}
-		const activeMovedText = this._diffModel.read(reader)!.activeMovedText.read(reader);
-
 		for (const m of diff.movedTexts) {
 			originalDecorations.push({
 				range: m.lineRangeMapping.original.toInclusiveRange()!, options: {
