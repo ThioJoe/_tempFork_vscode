@@ -11,9 +11,10 @@ import { DiffEditorOptions } from '../diffEditorOptions.js';
 import { DiffEditorViewModel } from '../diffEditorViewModel.js';
 import { DiffEditorWidget } from '../diffEditorWidget.js';
 import { MovedBlocksLinesFeature } from '../features/movedBlocksLinesFeature.js';
-import { diffAddDecoration, diffAddDecorationEmpty, diffDeleteDecoration, diffDeleteDecorationEmpty, diffLineAddDecorationBackground, diffLineAddDecorationBackgroundWithIndicator, diffLineDeleteDecorationBackground, diffLineDeleteDecorationBackgroundWithIndicator, diffWholeLineAddDecoration, diffWholeLineDeleteDecoration } from '../registrations.contribution.js';
+import { diffAddDecoration, diffAddDecorationEmpty, diffDeleteDecoration, diffDeleteDecorationEmpty, diffLineAddDecorationBackground, diffLineAddDecorationBackgroundWithIndicator, diffLineDeleteDecorationBackground, diffLineDeleteDecorationBackgroundWithIndicator, diffLineMoveActiveDecorationBackground, diffLineMoveDecorationBackground, diffWholeLineAddDecoration, diffWholeLineDeleteDecoration } from '../registrations.contribution.js';
 import { applyObservableDecorations } from '../utils.js';
-import { IModelDeltaDecoration } from '../../../../common/model.js';
+import { LineRange, LineRangeSet } from '../../../../common/core/ranges/lineRange.js';
+import { IModelDecorationOptions, IModelDeltaDecoration } from '../../../../common/model.js';
 
 export class DiffEditorDecorations extends Disposable {
 	constructor(
@@ -41,48 +42,88 @@ export class DiffEditorDecorations extends Disposable {
 
 		const originalDecorations: IModelDeltaDecoration[] = [];
 		const modifiedDecorations: IModelDeltaDecoration[] = [];
+		const activeMovedText = this._diffModel.read(reader)!.activeMovedText.read(reader);
 		if (!movedTextToCompare) {
+			const originalMovedRanges = new LineRangeSet();
+			const modifiedMovedRanges = new LineRangeSet();
+			for (const m of diff.movedTexts) {
+				originalMovedRanges.addRange(m.lineRangeMapping.original);
+				modifiedMovedRanges.addRange(m.lineRangeMapping.modified);
+			}
+			const pushLineDecorations = (decorations: IModelDeltaDecoration[], ranges: readonly LineRange[], options: IModelDecorationOptions) => {
+				for (const range of ranges) {
+					const inclusiveRange = range.toInclusiveRange();
+					if (inclusiveRange) {
+						decorations.push({ range: inclusiveRange, options });
+					}
+				}
+			};
+			const pushMovedLineDecorations = (decorations: IModelDeltaDecoration[], range: LineRange, side: 'original' | 'modified') => {
+				for (const movedText of diff.movedTexts) {
+					const movedRange = side === 'original' ? movedText.lineRangeMapping.original : movedText.lineRangeMapping.modified;
+					const intersectingRange = range.intersect(movedRange);
+					if (intersectingRange && !intersectingRange.isEmpty) {
+						pushLineDecorations(decorations, [intersectingRange], movedText === activeMovedText ? diffLineMoveActiveDecorationBackground : diffLineMoveDecorationBackground);
+					}
+				}
+			};
+			const pushChangeDecorations = (m: typeof diff.mappings[number]) => {
+				const useInlineDiff = this._options.useTrueInlineDiffRendering.read(reader) && allowsTrueInlineDiffRendering(m.lineRangeMapping);
+				for (const i of m.lineRangeMapping.innerChanges || []) {
+					// Don't show empty markers outside the line range
+					if (m.lineRangeMapping.original.contains(i.originalRange.startLineNumber)) {
+						originalDecorations.push({ range: i.originalRange, options: (i.originalRange.isEmpty() && showEmptyDecorations) ? diffDeleteDecorationEmpty : diffDeleteDecoration });
+					}
+					if (m.lineRangeMapping.modified.contains(i.modifiedRange.startLineNumber)) {
+						modifiedDecorations.push({ range: i.modifiedRange, options: (i.modifiedRange.isEmpty() && showEmptyDecorations && !useInlineDiff) ? diffAddDecorationEmpty : diffAddDecoration });
+					}
+					if (useInlineDiff) {
+						const deletedText = diffModel!.model.original.getValueInRange(i.originalRange);
+						modifiedDecorations.push({
+							range: i.modifiedRange,
+							options: {
+								description: 'deleted-text',
+								before: {
+									content: deletedText,
+									inlineClassName: 'inline-deleted-text',
+								},
+								zIndex: 100000,
+								showIfCollapsed: true,
+							}
+						});
+					}
+				}
+			};
+
 			for (const m of diff.mappings) {
-				if (!m.lineRangeMapping.original.isEmpty) {
-					originalDecorations.push({ range: m.lineRangeMapping.original.toInclusiveRange()!, options: renderIndicators ? diffLineDeleteDecorationBackgroundWithIndicator : diffLineDeleteDecorationBackground });
-				}
-				if (!m.lineRangeMapping.modified.isEmpty) {
-					modifiedDecorations.push({ range: m.lineRangeMapping.modified.toInclusiveRange()!, options: renderIndicators ? diffLineAddDecorationBackgroundWithIndicator : diffLineAddDecorationBackground });
-				}
+				const originalLineBackground = renderIndicators ? diffLineDeleteDecorationBackgroundWithIndicator : diffLineDeleteDecorationBackground;
+				const modifiedLineBackground = renderIndicators ? diffLineAddDecorationBackgroundWithIndicator : diffLineAddDecorationBackground;
+				const originalRanges = originalMovedRanges.subtractFrom(m.lineRangeMapping.original).ranges;
+				const modifiedRanges = modifiedMovedRanges.subtractFrom(m.lineRangeMapping.modified).ranges;
+				pushLineDecorations(originalDecorations, originalRanges, originalLineBackground);
+				pushLineDecorations(modifiedDecorations, modifiedRanges, modifiedLineBackground);
+				pushMovedLineDecorations(originalDecorations, m.lineRangeMapping.original, 'original');
+				pushMovedLineDecorations(modifiedDecorations, m.lineRangeMapping.modified, 'modified');
 
 				if (m.lineRangeMapping.modified.isEmpty || m.lineRangeMapping.original.isEmpty) {
-					if (!m.lineRangeMapping.original.isEmpty) {
-						originalDecorations.push({ range: m.lineRangeMapping.original.toInclusiveRange()!, options: diffWholeLineDeleteDecoration });
-					}
-					if (!m.lineRangeMapping.modified.isEmpty) {
-						modifiedDecorations.push({ range: m.lineRangeMapping.modified.toInclusiveRange()!, options: diffWholeLineAddDecoration });
-					}
+					pushLineDecorations(originalDecorations, originalRanges, diffWholeLineDeleteDecoration);
+					pushLineDecorations(modifiedDecorations, modifiedRanges, diffWholeLineAddDecoration);
 				} else {
-					const useInlineDiff = this._options.useTrueInlineDiffRendering.read(reader) && allowsTrueInlineDiffRendering(m.lineRangeMapping);
-					for (const i of m.lineRangeMapping.innerChanges || []) {
-						// Don't show empty markers outside the line range
-						if (m.lineRangeMapping.original.contains(i.originalRange.startLineNumber)) {
-							originalDecorations.push({ range: i.originalRange, options: (i.originalRange.isEmpty() && showEmptyDecorations) ? diffDeleteDecorationEmpty : diffDeleteDecoration });
-						}
-						if (m.lineRangeMapping.modified.contains(i.modifiedRange.startLineNumber)) {
-							modifiedDecorations.push({ range: i.modifiedRange, options: (i.modifiedRange.isEmpty() && showEmptyDecorations && !useInlineDiff) ? diffAddDecorationEmpty : diffAddDecoration });
-						}
-						if (useInlineDiff) {
-							const deletedText = diffModel!.model.original.getValueInRange(i.originalRange);
-							modifiedDecorations.push({
-								range: i.modifiedRange,
-								options: {
-									description: 'deleted-text',
-									before: {
-										content: deletedText,
-										inlineClassName: 'inline-deleted-text',
-									},
-									zIndex: 100000,
-									showIfCollapsed: true,
-								}
-							});
-						}
+					pushChangeDecorations(m);
+				}
+			}
+
+			for (const movedText of diff.movedTexts) {
+				for (const m of movedText.changes) {
+					const originalRange = m.original.toInclusiveRange();
+					if (originalRange) {
+						originalDecorations.push({ range: originalRange, options: renderIndicators ? diffLineDeleteDecorationBackgroundWithIndicator : diffLineDeleteDecorationBackground });
 					}
+					const modifiedRange = m.modified.toInclusiveRange();
+					if (modifiedRange) {
+						modifiedDecorations.push({ range: modifiedRange, options: renderIndicators ? diffLineAddDecorationBackgroundWithIndicator : diffLineAddDecorationBackground });
+					}
+					pushChangeDecorations({ lineRangeMapping: m });
 				}
 			}
 		}
@@ -104,8 +145,6 @@ export class DiffEditorDecorations extends Disposable {
 				}
 			}
 		}
-		const activeMovedText = this._diffModel.read(reader)!.activeMovedText.read(reader);
-
 		for (const m of diff.movedTexts) {
 			originalDecorations.push({
 				range: m.lineRangeMapping.original.toInclusiveRange()!, options: {
