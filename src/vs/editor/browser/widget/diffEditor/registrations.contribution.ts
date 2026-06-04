@@ -10,32 +10,6 @@ import { localize } from '../../../../nls.js';
 import { registerColor } from '../../../../platform/theme/common/colorRegistry.js';
 import { registerIcon } from '../../../../platform/theme/common/iconRegistry.js';
 
-export const diffMoveBorder = registerColor(
-	'diffEditor.move.border',
-	'#8b8b8b9c',
-	localize('diffEditor.move.border', 'The border color for text that got moved in the diff editor.')
-);
-
-export const diffMoveBorderActive = registerColor(
-	'diffEditor.moveActive.border',
-	'#FFA500',
-	localize('diffEditor.moveActive.border', 'The active border color for text that got moved in the diff editor.')
-);
-
-export const diffMoveBackground = registerColor(
-	'diffEditor.move.background',
-	{ dark: '#8b8b8b33', light: '#8b8b8b33', hcDark: null, hcLight: null },
-	localize('diffEditor.move.background', 'Background color for text that got moved in the diff editor. The color must not be opaque so as not to hide underlying decorations.'),
-	true
-);
-
-export const diffMoveBackgroundActive = registerColor(
-	'diffEditor.moveActive.background',
-	{ dark: '#FFA50033', light: '#FFA50033', hcDark: null, hcLight: null },
-	localize('diffEditor.moveActive.background', 'The active background color for text that got moved in the diff editor. The color must not be opaque so as not to hide underlying decorations.'),
-	true
-);
-
 export const diffEditorUnchangedRegionShadow = registerColor(
 	'diffEditor.unchangedRegionShadow',
 	{ dark: '#000000', light: '#737373BF', hcDark: '#000000', hcLight: '#737373BF', },
@@ -73,6 +47,18 @@ export const diffLineDeleteDecorationBackground = ModelDecorationOptions.registe
 	description: 'line-delete',
 	isWholeLine: true,
 	marginClassName: 'gutter-delete',
+});
+
+export const diffLineMoveDecorationBackground = ModelDecorationOptions.register({
+	className: 'line-move',
+	description: 'line-move',
+	isWholeLine: true,
+});
+
+export const diffLineMoveActiveDecorationBackground = ModelDecorationOptions.register({
+	className: 'line-move currentMove',
+	description: 'line-move currentMove',
+	isWholeLine: true,
 });
 
 export const diffAddDecoration = ModelDecorationOptions.register({

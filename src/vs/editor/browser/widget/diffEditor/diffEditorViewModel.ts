@@ -433,26 +433,7 @@ export class DiffState {
 export class DiffMapping {
 	constructor(
 		readonly lineRangeMapping: DetailedLineRangeMapping,
-	) {
-		/*
-		readonly movedTo: MovedText | undefined,
-		readonly movedFrom: MovedText | undefined,
-
-		if (movedTo) {
-			assertFn(() =>
-				movedTo.lineRangeMapping.modifiedRange.equals(lineRangeMapping.modifiedRange)
-				&& lineRangeMapping.originalRange.isEmpty
-				&& !movedFrom
-			);
-		} else if (movedFrom) {
-			assertFn(() =>
-				movedFrom.lineRangeMapping.originalRange.equals(lineRangeMapping.originalRange)
-				&& lineRangeMapping.modifiedRange.isEmpty
-				&& !movedTo
-			);
-		}
-		*/
-	}
+	) { }
 }
 
 export class UnchangedRegion {
