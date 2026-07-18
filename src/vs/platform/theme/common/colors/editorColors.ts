@@ -328,11 +328,11 @@ export const diffRemovedOutline = registerColor('diffEditor.removedTextBorder',
 	nls.localize('diffEditorRemovedOutline', 'Outline color for text that got removed.'));
 
 export const diffMoveBorder = registerColor('diffEditor.move.border',
-	'#0038a1',
+	'#8b8b8b9c',
 	nls.localize('diffEditorMoveBorder', 'Border color for text that got moved in the diff editor.'));
 
 export const diffMoveBorderActive = registerColor('diffEditor.moveActive.border',
-	'#0049cf',
+	'#FFA500',
 	nls.localize('diffEditorMoveActiveBorder', 'Active border color for text that got moved in the diff editor.'));
 
 export const diffBorder = registerColor('diffEditor.border',
